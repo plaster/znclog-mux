@@ -1,0 +1,15 @@
+#!/bin/bash
+
+logroot="$1"
+if [ "X$logroot" = X ]
+then
+    echo 1>&2 'logroot is not given'
+    exit 1
+fi
+
+while read filepath
+do
+    filename="$(echo "$filepath" | sed -e "s@^$logroot@@")"
+    gosh -Ilib -u'text.znclog.parser' -E'port-for-each (.$ (pa$ format #t "~s~%") vector parse-line) read-line' < "$filepath" |
+        sed -e "s@^@$filename @"
+done < <( find "$logroot" -type f )
