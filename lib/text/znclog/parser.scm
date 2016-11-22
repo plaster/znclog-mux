@@ -5,6 +5,7 @@
     parse-line
     parse-file$
     parse-file
+    parse-yyyymmdd
     )
 
   (use util.match)
@@ -70,3 +71,12 @@
          ) ) ) )
 
 (define parse-file (parse-file$ default-path-of))
+
+(define (parse-yyyymmdd yyyymmdd)
+  (rxmatch-case yyyymmdd
+    [ #/^(\d\d\d\d)(\d\d)(\d\d)$/ (#f yyyy-s mm-s dd-s)
+      (list (string->number yyyy-s 10)
+            (string->number mm-s 10)
+            (string->number dd-s 10)
+            ) ]
+    [ else #f ] ) )
