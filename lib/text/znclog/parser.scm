@@ -52,21 +52,21 @@
 (define ((parse-file$ path-of) logroot nw ch yyyy mm dd)
   ($ reverse $ (cut vector-ref <> 1)
      $ call-with-input-file (path-of logroot nw ch yyyy mm dd)
-     (^ (in)
-        (port-fold
-          (match-lambda*
-            [ ( line #( line-no parsed-lines ) )
-             (vector
-               (+ line-no 1)
-               (cons (match (parse-line line)
-                       [ ( HH MM SS type . args )
-                        `( ,nw ,ch ,yyyy ,mm ,dd ,HH ,MM ,SS ,line-no ,type ,@args )
-                        ] )
-                     parsed-lines) )
-             ]
-            )
-          '#( 0 () )
-          (pa$ read-line in)
-          ) ) ) )
+     (^(in)
+       (port-fold
+         (match-lambda*
+           [ ( line #( line-no parsed-lines ) )
+            (vector
+              (+ line-no 1)
+              (cons (match (parse-line line)
+                      [ ( HH MM SS type . args )
+                       `( ,nw ,ch ,yyyy ,mm ,dd ,HH ,MM ,SS ,line-no ,type ,@args )
+                       ] )
+                    parsed-lines) )
+            ]
+           )
+         '#( 0 () )
+         (pa$ read-line in)
+         ) ) ) )
 
 (define parse-file (parse-file$ default-path-of))
