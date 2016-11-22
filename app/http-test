@@ -1,0 +1,97 @@
+#!/usr/bin/env gosh
+; vi: se ft=scheme :
+
+(add-load-path "lib/")
+
+(use srfi-1)
+(use gauche.parseopt)
+(use gauche.parameter)
+(use gauche.generator)
+(use util.match)
+(use makiki)
+(use text.znclog.parser)
+
+(define service-port (make-parameter #f))
+(define service-znc-logroot (make-parameter #f))
+(define service-available-channels (make-parameter #f))
+(define service-available-networks (make-parameter #f))
+(define service-access-log (make-parameter #f))
+(define service-error-log (make-parameter #f))
+
+(define (parse-config-file config-file-name)
+  (call-with-input-file config-file-name parse-config-port)
+  )
+
+(define (parse-config-port i-port)
+  (port-for-each
+    (match-lambda
+      [ ('port port)
+       (service-port port) ]
+      [ ('access-log access-log)
+       (service-access-log access-log) ]
+      [ ('error-log error-log)
+       (service-error-log error-log) ]
+      [ ('znc-logroot logroot)
+       (service-znc-logroot logroot) ]
+      [ ('available-channels . available-channels)
+       (service-available-channels available-channels) ]
+      [ ('available-networks . available-networks)
+       (service-available-networks available-networks) ]
+      [ unknown-spec
+        (errorf "unknown config spec: ~s" unknown-spec) ]
+      )
+    (pa$ read i-port) ) )
+
+(define-http-handler #/.*/
+  (^(req app)
+    (let-params req [[nw-list "q:nw" :list #t]
+                     [ch-list "q:ch" :list #t :convert (pa$ string-append "#")]
+                     [dt-list "q:dt" :list #t :convert parse-yyyymmdd]
+                     ]
+      (flush (current-error-port))
+      (or ($ null? $ lset-difference string=? nw-list $ service-available-networks)
+          (request-error :status 404 :body '(json "no such nw")) )
+      (or ($ null? $ lset-difference string=? ch-list $ service-available-channels)
+          (request-error :status 404 :body '(json "no such ch")) )
+      (or (every values dt-list)
+          (request-error :status 400 :body '(json "invalid date pattern")) )
+      (respond/ok
+        req
+        ($ list 'json
+           $ list->vector
+           (append-map
+             (match-lambda
+               [ (yyyy mm dd)
+                (append-map
+                  (^(ch)
+                    (append-map
+                      (^(nw)
+                        (parse-file (service-znc-logroot)
+                                    nw ch
+                                    yyyy mm dd
+                                    ) )
+                      nw-list ) )
+                  ch-list )
+                ] )
+             dt-list )
+           ) ) ) ) )
+
+(define (main args)
+  (let-args (cdr args)
+    [[config-file-name "c|config=s"]
+     ]
+    (or config-file-name (error "config file is not specified"))
+    (parse-config-file config-file-name)
+    (or (service-port) (errorf "port is not configured"))
+    (or (service-access-log) (errorf "access-log is not configured"))
+    (or (service-error-log) (errorf "error-log is not configured"))
+
+    (or (service-znc-logroot) (errorf "znc-logroot is not configured"))
+    (or (service-available-networks) (errorf "available-networks is not configured"))
+    (or (service-available-channels) (errorf "available-channels is not configured"))
+
+    (start-http-server :port (service-port)
+                       :access-log (service-access-log)
+                       :error-log (service-error-log)
+                       )
+    ) )
