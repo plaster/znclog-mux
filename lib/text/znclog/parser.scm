@@ -18,29 +18,30 @@
 (define (parse-line line)
   (rxmatch-case line
     [ #/^\[(\d\d):(\d\d):(\d\d)\] (.*)$/ ( #f HH MM SS line )
-      (rxmatch-case line
-        [ #/^\*\*\* (.*)$/ ( #f msg )
-          (list HH MM SS
-                'server-message
-                msg)
-          ]
-        [ #/^<([^ ]+)> (.*)$/ ( #f nick msg )
-          (list HH MM SS
-                'user-message
-                msg nick)
-          ]
-        [ else
-          ;; unknown message type
-          (list HH MM SS
-                #f
-                line)
-          ]
-        ) ]
+      (list*
+        `(HH . ,HH) `(MM . ,MM) `(SS . ,SS)
+        (rxmatch-case line
+          [ #/^\*\*\* (.*)$/ ( #f msg )
+            (list `(type . "server-message")
+                  `(message . ,msg)
+                  `(parsed . #t)
+                  )
+            ]
+          [ #/^<([^ ]+)> (.*)$/ ( #f nick msg )
+            (list `(type . "user-message")
+                  `(message . ,msg)
+                  `(from . ,nick)
+                  )
+            ]
+          [ else
+            ;; unknown message type
+            (list `(raw-line . ,line)
+                  )
+            ]
+          ) ) ]
     [ else
       ;; unknown line type
-      (list #f #f #f
-            #f
-            line)
+      (list `(raw-line . ,line))
       ]
     ) )
 
@@ -56,13 +57,17 @@
      (^(in)
        (port-fold
          (match-lambda*
-           [ ( line #( line-no parsed-lines ) )
+           [ ( line #( lineno parsed-lines ) )
             (vector
-              (+ line-no 1)
-              (cons (match (parse-line line)
-                      [ ( HH MM SS type . args )
-                       `( ,nw ,ch ,yyyy ,mm ,dd ,HH ,MM ,SS ,line-no ,type ,@args )
-                       ] )
+              (+ lineno 1)
+              (cons (list* `(nw . ,nw)
+                           `(ch . ,ch)
+                           `(yyyy . ,yyyy)
+                           `(mm . ,mm)
+                           `(dd . ,dd)
+                           `(lineno . ,lineno)
+                           (parse-line line)
+                           )
                     parsed-lines) )
             ]
            )
