@@ -1,6 +1,6 @@
 #!/bin/bash
 
-gosh -Ilib -u'util.match' -u'text.znclog.parser' -E'
+gosh -Ilib -u'util.match' -u'text.znclog' -E'
 match *argv*
 [ ( _ logroot nw ch yyyy mm dd )
 ($ for-each (pa$ format #t "~s~%")

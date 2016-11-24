@@ -1,4 +1,4 @@
-(define-module text.znclog.parser
+(define-module text.znclog
 
   (export
     default-path-of
@@ -13,7 +13,7 @@
 
   )
 
-(select-module text.znclog.parser)
+(select-module text.znclog)
 
 (define (parse-line line)
   (rxmatch-case line

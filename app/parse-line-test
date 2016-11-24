@@ -10,6 +10,6 @@ fi
 while read filepath
 do
     filename="$(echo "$filepath" | sed -e "s@^$logroot@@")"
-    gosh -Ilib -u'text.znclog.parser' -E'port-for-each (.$ (pa$ format #t "~s~%") vector parse-line) read-line' < "$filepath" |
+    gosh -Ilib -u'text.znclog' -E'port-for-each (.$ (pa$ format #t "~s~%") vector parse-line) read-line' < "$filepath" |
         sed -e "s@^@$filename @"
 done < <( find "$logroot" -type f )

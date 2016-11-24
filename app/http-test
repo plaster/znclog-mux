@@ -9,7 +9,7 @@
 (use gauche.generator)
 (use util.match)
 (use makiki)
-(use text.znclog.parser)
+(use text.znclog)
 
 (define service-port (make-parameter #f))
 (define service-znc-logroot (make-parameter #f))
