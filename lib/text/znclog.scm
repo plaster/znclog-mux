@@ -10,6 +10,7 @@
 
   (use util.match)
   (use file.util)
+  (use gauche.generator)
 
   )
 
@@ -85,3 +86,17 @@
             (string->number dd-s 10)
             ) ]
     [ else #f ] ) )
+
+(define (%generate-file-args
+          :key
+          [ count-limit 100 ]
+          date-since
+          date-until
+          )
+  (generate
+    (^(yield)
+      (match `#(,date-since ,date-until)
+        [ #(_ _)
+          (error "not implemented")
+          ]
+        ) ) ) )
