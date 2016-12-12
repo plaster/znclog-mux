@@ -48,5 +48,14 @@
                                               ntake) ) )
            equal?)))
 
+(test-specs
+  '(( () "20161231" "20151231")
+    ( ("20151228" "20151229" "20151230" "20151231"
+       "20160101" "20160102" "20160103"
+       )
+     "20151228" "20160104")
+    )
+  (^ (expect . args)
+     (test "yyyymmdd-between" expect (pa$ apply yyyymmdd-between args) equal?)))
 
 (test-end :exit-on-failure 1)

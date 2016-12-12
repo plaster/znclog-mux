@@ -23,6 +23,7 @@
             date->time-utc
             time-utc->date
             make-time
+            time>?
             time-duration
             add-duration
             )
@@ -91,17 +92,25 @@
 (define (%date-giota date . args)
   (gmap (pa$ %date+ date) (apply giota args) ) )
 
-;; (define %date-between (error "not implemented"))
-;; (define %date-gbetween (error "not implemented"))
+(define (%date-gbetween date0 date1)
+  (gtake-while (.$ (pa$ time>? (date->time-utc date1))
+                   date->time-utc)
+               (%date-giota date0 +inf.0)
+               ))
+
+(define %date-between (.$ generator->list %date-giota))
 
 (define (yyyymmdd-iota yyyymmdd . args)
   (map %deparse
-       (apply %date-iota (%parse yyyymmdd) args)
-       ) )
+       (apply %date-iota (%parse yyyymmdd) args) ) )
 
 (define (yyyymmdd-giota yyyymmdd . args)
   (gmap %deparse
-        (apply %date-giota (%parse yyyymmdd) args)))
+        (apply %date-giota (%parse yyyymmdd) args) ) )
 
-;; (define yyyymmdd-between (error "not implemented"))
-;; (define yyyymmdd-gbetween (error "not implemented"))
+(define (yyyymmdd-gbetween yyyymmdd-0 yyyymmdd-1)
+  (gmap %deparse
+        (%date-gbetween (%parse yyyymmdd-0)
+                        (%parse yyyymmdd-1))))
+
+(define yyyymmdd-between (.$ generator->list yyyymmdd-gbetween))
