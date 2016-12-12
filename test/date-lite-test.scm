@@ -1,4 +1,5 @@
 (use gauche.test)
+(use gauche.generator)
 (use data.date-lite)
 
 (test-start "data.date-lite")
@@ -31,5 +32,21 @@
     )
   (^ (expect . args)
      (test "yyyymmdd-iota" expect (pa$ apply yyyymmdd-iota args) equal?) ) )
+
+(test-specs
+  '(( () 42 "20160101" 0)
+    ( ("20151227" "20151228" "20151229" "20151230" "20151231"
+       "20160101" "20160102" "20160103" "20160104" "20160105"
+       )
+     42
+     "20160101" 10 -5)
+    )
+  (^ (expect ntake . args)
+     (test "yyyymmdd-giota" expect (^()
+                                     (generator->list
+                                       (gtake (apply yyyymmdd-giota args)
+                                              ntake) ) )
+           equal?)))
+
 
 (test-end :exit-on-failure 1)

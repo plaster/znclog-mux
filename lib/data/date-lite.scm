@@ -88,7 +88,9 @@
 (define (%date-iota date . args)
   (map (pa$ %date+ date) (apply iota args) ) )
 
-;; (define %date-giota (error "not implemented"))
+(define (%date-giota date . args)
+  (gmap (pa$ %date+ date) (apply giota args) ) )
+
 ;; (define %date-between (error "not implemented"))
 ;; (define %date-gbetween (error "not implemented"))
 
@@ -97,6 +99,9 @@
        (apply %date-iota (%parse yyyymmdd) args)
        ) )
 
-;; (define yyyymmdd-giota (error "not implemented"))
+(define (yyyymmdd-giota yyyymmdd . args)
+  (gmap %deparse
+        (apply %date-giota (%parse yyyymmdd) args)))
+
 ;; (define yyyymmdd-between (error "not implemented"))
 ;; (define yyyymmdd-gbetween (error "not implemented"))
