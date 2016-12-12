@@ -5,20 +5,19 @@
 
 (test-module 'data.date-lite)
 
-(define yyyymmdd+-specs
+(define (test-specs spec-list tester)
+  (for-each (pa$ apply tester) spec-list))
+
+(test-specs
   '(( "20160101" "20150101" 365 )
     ( "20160101" "20151231" 1 )
     ( "20151231" "20160101" -1 )
     ( "20170101" "20160101" 366 )
-    ))
+    )
+  (^ (expect . args)
+     (test "yyyymmdd+" expect (pa$ apply yyyymmdd+ args) string=?) ) )
 
-(define (test-yyyymmdd+-spec expect op0 op1)
-  (test "yyyymmdd+" expect (pa$ yyyymmdd+ op0 op1) string=?))
-
-(for-each (pa$ apply test-yyyymmdd+-spec)
-          yyyymmdd+-specs)
-
-(define yyyymmdd-iota-specs
+(test-specs
   '(( () "20160101" 0)
     ( ("20160101") "20160101" 1)
     ( ("20160101" "20160102" "20160103" "20160104" "20160105"
@@ -29,12 +28,8 @@
        "20160101" "20160102" "20160103" "20160104" "20160105"
        )
      "20160101" 10 -5)
-    ))
-
-(define (test-yyyymmdd-iota-spec expect . args)
-  (test "yyyymmdd-iota" expect (pa$ apply yyyymmdd-iota args) equal?))
-
-(for-each (pa$ apply test-yyyymmdd-iota-spec)
-          yyyymmdd-iota-specs)
+    )
+  (^ (expect . args)
+     (test "yyyymmdd-iota" expect (pa$ apply yyyymmdd-iota args) equal?) ) )
 
 (test-end :exit-on-failure 1)
