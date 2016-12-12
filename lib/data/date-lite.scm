@@ -10,6 +10,8 @@
     yyyymmdd-gbetween
     )
 
+  (use srfi-1)
+
   (use gauche.generator)
 
   ;;; implemented as srfi-19 date wrapper
@@ -83,12 +85,18 @@
    yyyymmdd
    ))
 
-;; (define %date-iota (error "not implemented"))
+(define (%date-iota date . args)
+  (map (pa$ %date+ date) (apply iota args) ) )
+
 ;; (define %date-giota (error "not implemented"))
 ;; (define %date-between (error "not implemented"))
 ;; (define %date-gbetween (error "not implemented"))
 
-;; (define yyyymmdd-iota (error "not implemented"))
+(define (yyyymmdd-iota yyyymmdd . args)
+  (map %deparse
+       (apply %date-iota (%parse yyyymmdd) args)
+       ) )
+
 ;; (define yyyymmdd-giota (error "not implemented"))
 ;; (define yyyymmdd-between (error "not implemented"))
 ;; (define yyyymmdd-gbetween (error "not implemented"))
