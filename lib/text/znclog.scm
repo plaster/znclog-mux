@@ -52,6 +52,11 @@
      nw ch yyyy mm dd
      ) )
 
+(define ((%call-with-input-file* fallback) filename . args)
+  (cond [ (file-exists? filename)
+         (apply call-with-input-file filename . args) ]
+        [ else fallback ] ) )
+
 (define ((parse-file$ path-of) logroot nw ch yyyy mm dd)
   ($ reverse $ (cut vector-ref <> 1)
      $ call-with-input-file (path-of logroot nw ch yyyy mm dd)
